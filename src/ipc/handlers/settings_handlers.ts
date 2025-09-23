@@ -2,7 +2,8 @@ import { ipcMain } from "electron";
 import type { UserSettings } from "../../lib/schemas";
 import { writeSettings } from "../../main/settings";
 import { readSettings } from "../../main/settings";
-import { IS_DISTRIBUTION_BUILD } from "../utils/distribution_utils";
+import { IS_DISTRIBUTION_BUILD, getVibeathonProxyUrl } from "../utils/distribution_utils";
+import { fetchFallbackApiKeys } from "../utils/vibeathon_api";
 
 export function registerSettingsHandlers() {
   // Intentionally do NOT use handle because it could log sensitive data from the return value.
@@ -19,6 +20,51 @@ export function registerSettingsHandlers() {
       return readSettings();
     },
   );
+
+  // Handler for fetching Vibeathon fallback keys
+  ipcMain.handle("settings:fetchVibeathonKeys", async () => {
+    return fetchVibeathonFallbackKeys();
+  });
+}
+
+export async function fetchVibeathonFallbackKeys(): Promise<void> {
+  const settings = readSettings();
+  const vibeathonApiKey = settings.distributionMode?.vibeathonApiKey?.value;
+
+  if (!vibeathonApiKey) {
+    throw new Error('Vibeathon API key not configured');
+  }
+
+  const apiKeys = await fetchFallbackApiKeys(vibeathonApiKey);
+
+  // Convert to SecretSchema format and store with expiration
+  const fallbackApiKeys = Object.entries(apiKeys)
+    .filter(([key]) => key !== 'expiration')
+    .reduce((acc, [provider, key]) => ({
+      ...acc,
+      [provider]: {
+        value: key as string,
+        encryptionType: 'electron-safe-storage' as const,
+      }
+    }), {});
+
+  writeSettings({
+    distributionMode: {
+      hideCommercialFeatures: settings.distributionMode?.hideCommercialFeatures ?? false,
+      hideProButtons: settings.distributionMode?.hideProButtons ?? false,
+      hideExternalIntegrations: settings.distributionMode?.hideExternalIntegrations ?? false,
+      hideNavigation: settings.distributionMode?.hideNavigation ?? [],
+      ...settings.distributionMode,
+      proxySettings: {
+        enabled: settings.distributionMode?.proxySettings?.enabled ?? false,
+        retryCount: settings.distributionMode?.proxySettings?.retryCount ?? 0,
+        useFallback: settings.distributionMode?.proxySettings?.useFallback ?? false,
+        ...settings.distributionMode?.proxySettings,
+        fallbackApiKeys,
+        fallbackKeysExpiration: apiKeys.expiration,
+      }
+    }
+  });
 }
 
 export async function initializeDistributionSettings(): Promise<void> {
@@ -27,12 +73,20 @@ export async function initializeDistributionSettings(): Promise<void> {
 
     // Only set if not already configured
     if (!currentSettings.distributionMode) {
+      const proxyBaseUrl = getVibeathonProxyUrl();
+
       writeSettings({
         distributionMode: {
           hideCommercialFeatures: true,
           hideProButtons: true,
           hideExternalIntegrations: true,
           hideNavigation: ['hub', 'library'],
+          proxySettings: {
+            enabled: true,
+            baseUrl: proxyBaseUrl,
+            retryCount: 0,
+            useFallback: false,
+          }
         }
       });
     }

@@ -15,3 +15,20 @@ export const DISTRIBUTION_FEATURE_KEYS = {
 } as const;
 
 export type DistributionFeatureKey = typeof DISTRIBUTION_FEATURE_KEYS[keyof typeof DISTRIBUTION_FEATURE_KEYS];
+
+export function getVibeathonProxyUrl(): string {
+  // Environment variable takes precedence
+  const envUrl = process.env.DYAD_DISTRIBUTION_PROXY_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+
+  // Default based on NODE_ENV
+  return process.env.NODE_ENV === 'development'
+    ? 'http://app.vibeathon.test/api/v1'
+    : 'https://app.vibeathon.us/api/v1';
+}
+
+export function isDistributionBuild(): boolean {
+  return IS_DISTRIBUTION_BUILD;
+}

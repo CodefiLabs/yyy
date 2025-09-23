@@ -605,6 +605,16 @@ export class IpcClient {
     }
   }
 
+  // Fetch Vibeathon fallback API keys
+  public async fetchVibeathonKeys(): Promise<void> {
+    try {
+      await this.ipcRenderer.invoke("settings:fetchVibeathonKeys");
+    } catch (error) {
+      showError(error);
+      throw error;
+    }
+  }
+
   // Delete an app and all its files
   public async deleteApp(appId: number): Promise<void> {
     await this.ipcRenderer.invoke("delete-app", { appId });

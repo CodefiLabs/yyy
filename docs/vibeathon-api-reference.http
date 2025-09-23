@@ -1,0 +1,240 @@
+# Vibeathon API Reference for Laravel Implementation
+# This file contains the API endpoints that need to be implemented in the Laravel backend
+# to support the Dyad distribution proxy routing system.
+
+### Variables
+@baseUrl = {{$dotenv VIBEATHON_API_BASE_URL}}
+@token = {{$dotenv VIBEATHON_API_TOKEN}}
+
+### 1. Get User AI Keys
+# Endpoint: GET /api/v1/user/ai-keys
+# Description: Fetches the user's fallback AI provider keys for distribution mode
+# Authentication: Bearer token required
+
+GET {{baseUrl}}/user/ai-keys
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Expected Response:
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+#
+# {
+#   "openai": "sk-proj-xxxxx...",
+#   "anthropic": "sk-ant-xxxxx...",
+#   "google": "AIzaSyXXXXX...",
+#   "xai": "xai-xxxxx...",
+#   "expiration": "2025-12-31T23:59:59.000Z"
+# }
+
+### Error Responses:
+# HTTP/1.1 401 Unauthorized
+# {
+#   "message": "Invalid or expired API key"
+# }
+#
+# HTTP/1.1 404 Not Found
+# {
+#   "message": "User not found"
+# }
+#
+# HTTP/1.1 500 Internal Server Error
+# {
+#   "message": "Unable to retrieve API keys at this time"
+# }
+
+###
+
+### 2. Sync Failed Request (for offline sync)
+# Endpoint: POST /api/v1/sync/failed-request
+# Description: Syncs a failed request that occurred when proxy was offline
+# Authentication: Bearer token required
+
+POST {{baseUrl}}/sync/failed-request
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "requestId": "req-12345-abcde",
+  "originalTimestamp": "2025-01-15T10:30:00.000Z",
+  "requestData": {
+    "model": "gpt-4",
+    "provider": "openai",
+    "messageCount": 3,
+    "timestamp": "2025-01-15T10:30:00.000Z"
+  },
+  "error": "Connection timeout after 30 seconds"
+}
+
+### Expected Response:
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+#
+# {
+#   "message": "Request synced successfully",
+#   "requestId": "req-12345-abcde",
+#   "syncedAt": "2025-01-15T15:45:00.000Z"
+# }
+
+### Error Responses:
+# HTTP/1.1 400 Bad Request
+# {
+#   "message": "Invalid request data",
+#   "errors": {
+#     "requestId": "Required field missing",
+#     "originalTimestamp": "Invalid date format"
+#   }
+# }
+
+###
+
+### 3. Proxy AI Request (main proxy endpoint)
+# Endpoint: POST /api/v1/chat/completions
+# Description: OpenAI-compatible proxy endpoint for all AI requests
+# Authentication: Bearer token required
+
+POST {{baseUrl}}/chat/completions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ],
+  "stream": true,
+  "max_tokens": 2000,
+  "temperature": 0.7,
+  "metadata": {
+    "original_provider": "openai",
+    "request_id": "req-67890-fghij",
+    "user_agent": "Dyad/Distribution"
+  }
+}
+
+### Expected Response (Streaming):
+# HTTP/1.1 200 OK
+# Content-Type: text/event-stream
+# Cache-Control: no-cache
+# Connection: keep-alive
+#
+# data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+#
+# data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+#
+# data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+#
+# data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-4","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+#
+# data: [DONE]
+
+### Non-Streaming Response:
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+#
+# {
+#   "id": "chatcmpl-123",
+#   "object": "chat.completion",
+#   "created": 1677652288,
+#   "model": "gpt-4",
+#   "choices": [
+#     {
+#       "index": 0,
+#       "message": {
+#         "role": "assistant",
+#         "content": "Hello! I'm doing well, thank you for asking. How are you today?"
+#       },
+#       "finish_reason": "stop"
+#     }
+#   ],
+#   "usage": {
+#     "prompt_tokens": 9,
+#     "completion_tokens": 17,
+#     "total_tokens": 26
+#   }
+# }
+
+### Error Responses:
+# HTTP/1.1 429 Too Many Requests
+# {
+#   "error": {
+#     "message": "Rate limit exceeded",
+#     "type": "rate_limit_error",
+#     "code": "rate_limit_exceeded"
+#   }
+# }
+#
+# HTTP/1.1 500 Internal Server Error
+# {
+#   "error": {
+#     "message": "The server had an error while processing your request",
+#     "type": "server_error"
+#   }
+# }
+
+###
+
+### 4. Health Check
+# Endpoint: GET /api/v1/health
+# Description: Check if the proxy service is healthy and operational
+# Authentication: Not required
+
+GET {{baseUrl}}/health
+
+### Expected Response:
+# HTTP/1.1 200 OK
+# Content-Type: application/json
+#
+# {
+#   "status": "healthy",
+#   "timestamp": "2025-01-15T15:45:00.000Z",
+#   "version": "1.0.0",
+#   "services": {
+#     "database": "healthy",
+#     "openai": "healthy",
+#     "anthropic": "healthy",
+#     "google": "healthy"
+#   }
+# }
+
+###
+
+### Notes for Laravel Implementation:
+
+# 1. Authentication:
+#    - Use Laravel Sanctum or Passport for Bearer token authentication
+#    - Validate API keys against user records in your database
+#    - Implement rate limiting using Laravel's built-in throttling
+
+# 2. Request Validation:
+#    - Use Laravel Form Requests for input validation
+#    - Validate OpenAI-compatible request format for /chat/completions
+#    - Ensure proper error responses with meaningful messages
+
+# 3. Proxy Implementation:
+#    - Route requests to actual AI providers (OpenAI, Anthropic, etc.)
+#    - Handle streaming responses using Server-Sent Events
+#    - Implement proper error handling and retry logic
+#    - Log requests for analytics and debugging
+
+# 4. Database Schema:
+#    - Store user API keys securely (encrypted)
+#    - Track usage and rate limits per user
+#    - Store failed request sync data for offline capabilities
+
+# 5. Security Considerations:
+#    - Encrypt sensitive data (API keys) in database
+#    - Implement CORS policies for frontend access
+#    - Use HTTPS in production
+#    - Validate and sanitize all inputs
+
+# 6. Environment Variables:
+#    - OPENAI_API_KEY - Your OpenAI API key
+#    - ANTHROPIC_API_KEY - Your Anthropic API key
+#    - GOOGLE_AI_KEY - Your Google AI API key
+#    - XAI_API_KEY - Your xAI API key
+#    - APP_ENV - Environment (development/production)
+#    - DB_* - Database configuration
