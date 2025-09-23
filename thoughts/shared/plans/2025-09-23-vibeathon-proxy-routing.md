@@ -987,10 +987,10 @@ export function setupVibeathonMockRoutes(app: any) {
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Build scripts execute successfully: `npm run build:distribution:dev`
-- [ ] Package scripts work: `npm run make:distribution:prod`
-- [ ] Environment variable detection works: `npm test -- distribution_utils.test.ts`
-- [ ] E2E tests pass with distribution mode: `npm run e2e -- distribution.spec.ts`
+- [x] Build scripts execute successfully: `npm run build:distribution:dev`
+- [x] Package scripts work: `npm run make:distribution:prod`
+- [x] Environment variable detection works: `npm test -- distribution_utils.test.ts`
+- [x] E2E tests pass with distribution mode: `npm run e2e -- distribution.spec.ts`
 
 #### Manual Verification:
 - [ ] Development build uses app.vibeathon.test URL
