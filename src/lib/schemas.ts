@@ -240,6 +240,16 @@ export const UserSettingsSchema = z.object({
     hideProButtons: z.boolean().optional().default(false),
     hideExternalIntegrations: z.boolean().optional().default(false),
     hideNavigation: z.array(z.string()).optional().default([]),
+    vibeathonApiKey: SecretSchema.optional(),
+    proxySettings: z.object({
+      enabled: z.boolean().optional().default(false),
+      baseUrl: z.string().optional(),
+      fallbackApiKeys: z.record(z.string(), SecretSchema).optional(), // {openai: {value, encryptionType}, anthropic: {value, encryptionType}}
+      fallbackKeysExpiration: z.string().optional(), // ISO date string
+      retryCount: z.number().optional().default(0),
+      lastFailure: z.string().optional(), // ISO date string
+      useFallback: z.boolean().optional().default(false),
+    }).optional(),
   }).optional(),
 
   ////////////////////////////////
@@ -290,6 +300,10 @@ export function shouldHideFeature(settings: UserSettings, featureKey: Distributi
       return config.hideExternalIntegrations;
     case 'more-ideas':
       return config.hideCommercialFeatures;
+    case 'model-providers':
+    case 'model-picker':
+    case 'provider-setup':
+      return config.hideCommercialFeatures || config.proxySettings?.enabled === true;
     default:
       return false;
   }

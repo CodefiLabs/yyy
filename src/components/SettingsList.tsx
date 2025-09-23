@@ -2,6 +2,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { shouldHideFeature } from '@/lib/schemas';
+import { useSettings } from '@/hooks/useSettings';
 
 const SETTINGS_SECTIONS = [
   { id: "general-settings", label: "General" },
@@ -17,8 +19,16 @@ const SETTINGS_SECTIONS = [
 
 export function SettingsList({ show }: { show: boolean }) {
   const navigate = useNavigate();
+  const { settings } = useSettings();
   const [activeSection, setActiveSection] = useState<string | null>(
     "general-settings",
+  );
+
+  // Filter out model-providers section when hidden
+  const filteredSections = SETTINGS_SECTIONS.filter(section =>
+    section.id !== 'provider-settings' ||
+    !settings ||
+    !shouldHideFeature(settings, 'model-providers')
   );
 
   useEffect(() => {
@@ -34,7 +44,7 @@ export function SettingsList({ show }: { show: boolean }) {
       { rootMargin: "-20% 0px -80% 0px", threshold: 0 },
     );
 
-    for (const section of SETTINGS_SECTIONS) {
+    for (const section of filteredSections) {
       const el = document.getElementById(section.id);
       if (el) {
         observer.observe(el);
@@ -44,7 +54,7 @@ export function SettingsList({ show }: { show: boolean }) {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [filteredSections]);
 
   if (!show) {
     return null;
@@ -68,7 +78,7 @@ export function SettingsList({ show }: { show: boolean }) {
       </div>
       <ScrollArea className="flex-grow">
         <div className="space-y-1 p-4 pt-0">
-          {SETTINGS_SECTIONS.map((section) => (
+          {filteredSections.map((section) => (
             <button
               key={section.id}
               onClick={() => handleScrollAndNavigateTo(section.id)}

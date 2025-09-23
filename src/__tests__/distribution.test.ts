@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { shouldHideFeature, isDistributionMode } from '@/lib/schemas';
 import type { UserSettings } from '@/lib/schemas';
 

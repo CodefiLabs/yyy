@@ -9,6 +9,9 @@ export const DISTRIBUTION_FEATURE_KEYS = {
   LIBRARY_NAV: 'library-nav',
   IMPORT_APP: 'import-app',
   MORE_IDEAS: 'more-ideas',
+  MODEL_PROVIDERS: 'model-providers',
+  MODEL_PICKER: 'model-picker',
+  PROVIDER_SETUP: 'provider-setup',
 } as const;
 
 export type DistributionFeatureKey = typeof DISTRIBUTION_FEATURE_KEYS[keyof typeof DISTRIBUTION_FEATURE_KEYS];
