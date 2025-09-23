@@ -45,11 +45,35 @@ export function registerHelpBotHandlers() {
         const abortController = new AbortController();
         activeHelpStreams.set(sessionId, abortController);
         const settings = await readSettings();
-        const apiKey = settings.providerSettings?.["auto"]?.apiKey?.value;
-        const provider = createOpenAI({
-          baseURL: "https://helpchat.dyad.sh/v1",
-          apiKey,
-        });
+
+        let provider;
+
+        // Route through Vibeathon proxy if distribution mode enabled
+        if (settings.distributionMode?.proxySettings?.enabled &&
+            !settings.distributionMode?.proxySettings?.useFallback) {
+
+          const vibeathonApiKey = settings.distributionMode.vibeathonApiKey?.value;
+          const proxyBaseUrl = settings.distributionMode.proxySettings.baseUrl;
+
+          if (vibeathonApiKey && proxyBaseUrl) {
+            logger.info('Routing help bot through Vibeathon proxy');
+            provider = createOpenAI({
+              name: 'vibeathon-help-proxy',
+              baseURL: proxyBaseUrl,
+              apiKey: vibeathonApiKey,
+            });
+          }
+        }
+
+        // Fallback to original help chat endpoint
+        if (!provider) {
+          const apiKey = settings.providerSettings?.["auto"]?.apiKey?.value;
+          provider = createOpenAI({
+            name: "helpchat",
+            baseURL: "https://helpchat.dyad.sh/v1",
+            apiKey,
+          });
+        }
 
         let assistantContent = "";
 

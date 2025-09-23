@@ -77,6 +77,49 @@ export async function getModelClient(
     throw new Error(`Configuration not found for provider: ${model.provider}`);
   }
 
+  // Handle Vibeathon proxy routing for distribution mode
+  if (settings.distributionMode?.proxySettings?.enabled &&
+      !settings.distributionMode?.proxySettings?.useFallback) {
+
+    const proxySettings = settings.distributionMode.proxySettings;
+    const vibeathonApiKey = settings.distributionMode.vibeathonApiKey?.value;
+
+    if (vibeathonApiKey && proxySettings.baseUrl) {
+      logger.info('Routing AI request through Vibeathon proxy', {
+        model: model.name,
+        provider: model.provider,
+        proxyUrl: proxySettings.baseUrl
+      });
+
+      const vibeathonClient = {
+        model: createOpenAI({
+          name: 'vibeathon-proxy',
+          baseURL: proxySettings.baseUrl,
+          apiKey: vibeathonApiKey,
+        })(model.name),
+        builtinProviderId: model.provider,
+      };
+
+      return {
+        modelClient: vibeathonClient,
+      };
+    }
+  }
+
+  // Check for fallback mode
+  if (settings.distributionMode?.proxySettings?.useFallback &&
+      settings.distributionMode?.proxySettings?.fallbackApiKeys) {
+
+    logger.info('Using fallback API keys due to proxy failure');
+    const fallbackClient = await createFallbackClient(model, settings);
+
+    if (fallbackClient) {
+      return {
+        modelClient: fallbackClient,
+      };
+    }
+  }
+
   // Handle Dyad Pro override
   if (dyadApiKey && settings.enableDyadPro) {
     // Check if the selected provider supports Dyad Pro (has a gateway prefix) OR
@@ -424,4 +467,61 @@ function getRegularModelClient(
       throw new Error(`Unsupported model provider: ${model.provider}`);
     }
   }
+}
+
+async function createFallbackClient(model: LargeLanguageModel, settings: UserSettings): Promise<ModelClient | null> {
+  const fallbackKeys = settings.distributionMode?.proxySettings?.fallbackApiKeys;
+
+  if (!fallbackKeys) {
+    return null;
+  }
+
+  // Use fallback API keys for direct provider access
+  switch (model.provider) {
+    case 'openai':
+      if (fallbackKeys.openai?.value) {
+        return {
+          model: createOpenAI({
+            apiKey: fallbackKeys.openai.value,
+          })(model.name),
+          builtinProviderId: model.provider,
+        };
+      }
+      break;
+    case 'anthropic':
+      if (fallbackKeys.anthropic?.value) {
+        return {
+          model: createAnthropic({
+            apiKey: fallbackKeys.anthropic.value,
+          })(model.name),
+          builtinProviderId: model.provider,
+        };
+      }
+      break;
+    case 'google':
+      if (fallbackKeys.google?.value) {
+        return {
+          model: createGoogle({
+            apiKey: fallbackKeys.google.value,
+          })(model.name),
+          builtinProviderId: model.provider,
+        };
+      }
+      break;
+    case 'xai':
+      if (fallbackKeys.xai?.value) {
+        return {
+          model: createXai({
+            apiKey: fallbackKeys.xai.value,
+          })(model.name),
+          builtinProviderId: model.provider,
+        };
+      }
+      break;
+    default:
+      logger.warn(`Fallback not supported for provider: ${model.provider}`);
+      return null;
+  }
+
+  return null;
 }
