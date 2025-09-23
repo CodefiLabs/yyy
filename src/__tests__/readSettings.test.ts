@@ -53,6 +53,7 @@ describe("readSettings", () => {
       );
       expect(scrubSettings(result)).toMatchInlineSnapshot(`
         {
+          "distributionMode": undefined,
           "enableAutoFixProblems": false,
           "enableAutoUpdate": true,
           "enableProLazyEditsMode": true,
@@ -299,6 +300,7 @@ describe("readSettings", () => {
 
       expect(scrubSettings(result)).toMatchInlineSnapshot(`
         {
+          "distributionMode": undefined,
           "enableAutoFixProblems": false,
           "enableAutoUpdate": true,
           "enableProLazyEditsMode": true,

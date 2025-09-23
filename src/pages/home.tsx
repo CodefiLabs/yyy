@@ -6,6 +6,7 @@ import { IpcClient } from "@/ipc/ipc_client";
 import { generateCuteAppName } from "@/lib/utils";
 import { useLoadApps } from "@/hooks/useLoadApps";
 import { useSettings } from "@/hooks/useSettings";
+import { shouldHideFeature } from "@/lib/schemas";
 import { SetupBanner } from "@/components/SetupBanner";
 import { isPreviewOpenAtom } from "@/atoms/viewAtoms";
 import { useState, useEffect, useCallback } from "react";
@@ -189,7 +190,8 @@ export default function HomePage() {
         <ImportAppButton />
         <HomeChatInput onSubmit={handleSubmit} />
 
-        <div className="flex flex-col gap-4 mt-2">
+        {!(settings && shouldHideFeature(settings, 'more-ideas')) && (
+          <div className="flex flex-col gap-4 mt-2">
           <div className="flex flex-wrap gap-4 justify-center">
             {randomPrompts.map((item, index) => (
               <button
@@ -243,6 +245,7 @@ export default function HomePage() {
             </span>
           </button>
         </div>
+        )}
         <ProBanner />
       </div>
       <PrivacyBanner />

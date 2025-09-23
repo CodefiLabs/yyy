@@ -14,10 +14,14 @@ import { Label } from "@/components/ui/label";
 import { Sparkles, Info } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { IpcClient } from "@/ipc/ipc_client";
-import { hasDyadProKey, type UserSettings } from "@/lib/schemas";
+import { hasDyadProKey, shouldHideFeature, type UserSettings } from "@/lib/schemas";
 
 export function ProModeSelector() {
   const { settings, updateSettings } = useSettings();
+
+  if (settings && shouldHideFeature(settings, 'pro-buttons')) {
+    return null;
+  }
 
   const toggleLazyEdits = () => {
     updateSettings({

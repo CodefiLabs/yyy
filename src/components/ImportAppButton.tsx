@@ -2,9 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { useState } from "react";
 import { ImportAppDialog } from "./ImportAppDialog";
+import { useSettings } from "@/hooks/useSettings";
+import { shouldHideFeature } from "@/lib/schemas";
 
 export function ImportAppButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { settings } = useSettings();
+
+  if (settings && shouldHideFeature(settings, 'import-app')) {
+    return null;
+  }
 
   return (
     <>

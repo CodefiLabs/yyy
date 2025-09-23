@@ -14,6 +14,7 @@ import {
 import { handleSupabaseOAuthReturn } from "./supabase_admin/supabase_return_handler";
 import { handleDyadProReturn } from "./main/pro";
 import { IS_TEST_BUILD } from "./ipc/utils/test_utils";
+import { initializeDistributionSettings } from "./ipc/handlers/settings_handlers";
 import { BackupManager } from "./backup_manager";
 import { getDatabasePath, initializeDatabase } from "./db";
 import { UserSettings } from "./lib/schemas";
@@ -60,6 +61,7 @@ export async function onReady() {
   initializeDatabase();
   const settings = readSettings();
   await onFirstRunMaybe(settings);
+  await initializeDistributionSettings();
   createWindow();
 
   logger.info("Auto-update enabled=", settings.enableAutoUpdate);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DistributionFeatureKey } from '@/ipc/utils/distribution_utils';
 
 export const SecretSchema = z.object({
   value: z.string(),
@@ -232,6 +233,16 @@ export const UserSettingsSchema = z.object({
   runtimeMode2: RuntimeMode2Schema.optional(),
 
   ////////////////////////////////
+  // DISTRIBUTION MODE.
+  ////////////////////////////////
+  distributionMode: z.object({
+    hideCommercialFeatures: z.boolean().optional().default(false),
+    hideProButtons: z.boolean().optional().default(false),
+    hideExternalIntegrations: z.boolean().optional().default(false),
+    hideNavigation: z.array(z.string()).optional().default([]),
+  }).optional(),
+
+  ////////////////////////////////
   // E2E TESTING ONLY.
   ////////////////////////////////
   isTestMode: z.boolean().optional(),
@@ -255,6 +266,33 @@ export function isDyadProEnabled(settings: UserSettings): boolean {
 
 export function hasDyadProKey(settings: UserSettings): boolean {
   return !!settings.providerSettings?.auto?.apiKey?.value;
+}
+
+export function isDistributionMode(settings: UserSettings): boolean {
+  return settings?.distributionMode?.hideCommercialFeatures === true;
+}
+
+export function shouldHideFeature(settings: UserSettings, featureKey: DistributionFeatureKey): boolean {
+  if (!settings?.distributionMode) return false;
+
+  const config = settings.distributionMode;
+
+  switch (featureKey) {
+    case 'pro-banner':
+      return config.hideCommercialFeatures || config.hideProButtons;
+    case 'pro-buttons':
+      return config.hideProButtons;
+    case 'hub-nav':
+      return config.hideNavigation?.includes('hub');
+    case 'library-nav':
+      return config.hideNavigation?.includes('library');
+    case 'import-app':
+      return config.hideExternalIntegrations;
+    case 'more-ideas':
+      return config.hideCommercialFeatures;
+    default:
+      return false;
+  }
 }
 
 // Define interfaces for the props

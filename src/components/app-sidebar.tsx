@@ -11,6 +11,8 @@ import { useSidebar } from "@/components/ui/sidebar"; // import useSidebar hook
 import { useEffect, useState, useRef } from "react";
 import { useAtom } from "jotai";
 import { dropdownOpenAtom } from "@/atoms/uiAtoms";
+import { useSettings } from "@/hooks/useSettings";
+import { shouldHideFeature } from "@/lib/schemas";
 
 import {
   Sidebar,
@@ -30,7 +32,7 @@ import { HelpDialog } from "./HelpDialog"; // Import the new dialog
 import { SettingsList } from "./SettingsList";
 
 // Menu items.
-const items = [
+const allItems = [
   {
     title: "Apps",
     to: "/",
@@ -50,11 +52,13 @@ const items = [
     title: "Library",
     to: "/library",
     icon: BookOpen,
+    featureKey: 'library-nav' as const,
   },
   {
     title: "Hub",
     to: "/hub",
     icon: Store,
+    featureKey: 'hub-nav' as const,
   },
 ];
 
@@ -73,6 +77,12 @@ export function AppSidebar() {
   const expandedByHover = useRef(false);
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false); // State for dialog
   const [isDropdownOpen] = useAtom(dropdownOpenAtom);
+  const { settings } = useSettings();
+
+  // Filter items based on distribution settings
+  const items = allItems.filter(item =>
+    !item.featureKey || !(settings && shouldHideFeature(settings, item.featureKey))
+  );
 
   useEffect(() => {
     if (hoverState.startsWith("start-hover") && state === "collapsed") {
@@ -135,7 +145,7 @@ export function AppSidebar() {
                 setHoverState("clear-hover");
               }}
             />
-            <AppIcons onHoverChange={setHoverState} />
+            <AppIcons onHoverChange={setHoverState} items={items} />
           </div>
           {/* Right Column: Chat List Section */}
           <div className="w-[240px]">
@@ -173,8 +183,10 @@ export function AppSidebar() {
 
 function AppIcons({
   onHoverChange,
+  items,
 }: {
   onHoverChange: (state: HoverState) => void;
+  items: typeof allItems;
 }) {
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;

@@ -19,6 +19,8 @@
     "staging:gateway": "cross-env DYAD_GATEWAY_URL=https://staging---litellm-gcp-cloud-run-kq7pivehnq-uc.a.run.app/v1 npm start",
     "package": "npm run clean && electron-forge package",
     "make": "npm run clean && electron-forge make",
+    "build:distribution": "cross-env DYAD_DISTRIBUTION_BUILD=true npm run package",
+    "make:distribution": "cross-env DYAD_DISTRIBUTION_BUILD=true npm run make",
     "publish": "npm run clean && electron-forge publish",
     "verify-release": "node scripts/verify-release-assets.js",
     "ts": "npm run ts:main && npm run ts:workers",

@@ -9,6 +9,7 @@ import { useState } from "react";
 
 import { useSettings } from "@/hooks/useSettings";
 import { useUserBudgetInfo } from "@/hooks/useUserBudgetInfo";
+import { shouldHideFeature } from "@/lib/schemas";
 
 export function ProBanner() {
   const { settings } = useSettings();
@@ -20,6 +21,10 @@ export function ProBanner() {
   });
 
   if (settings?.enableDyadPro || userBudget) {
+    return null;
+  }
+
+  if (settings && shouldHideFeature(settings, 'pro-banner')) {
     return null;
   }
 
