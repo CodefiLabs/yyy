@@ -1,7 +1,9 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useScrollAndNavigateTo } from "@/hooks/useScrollAndNavigateTo";
+import { useAtom } from "jotai";
+import { activeSettingsSectionAtom } from "@/atoms/viewAtoms";
 import { shouldHideFeature } from '@/lib/schemas';
 import { useSettings } from '@/hooks/useSettings';
 
@@ -18,11 +20,12 @@ const SETTINGS_SECTIONS = [
 ];
 
 export function SettingsList({ show }: { show: boolean }) {
-  const navigate = useNavigate();
   const { settings } = useSettings();
-  const [activeSection, setActiveSection] = useState<string | null>(
-    "general-settings",
-  );
+  const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
+  const scrollAndNavigateTo = useScrollAndNavigateTo("/settings", {
+    behavior: "smooth",
+    block: "start",
+  });
 
   // Filter out model-providers section when hidden
   const filteredSections = SETTINGS_SECTIONS.filter(section =>
@@ -60,16 +63,7 @@ export function SettingsList({ show }: { show: boolean }) {
     return null;
   }
 
-  const handleScrollAndNavigateTo = async (id: string) => {
-    await navigate({
-      to: "/settings",
-    });
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-      setActiveSection(id);
-    }
-  };
+  const handleScrollAndNavigateTo = scrollAndNavigateTo;
 
   return (
     <div className="flex flex-col h-full">
