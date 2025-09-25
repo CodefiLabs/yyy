@@ -129,7 +129,8 @@ export async function getModelClient(
     if (providerConfig.gatewayPrefix != null || dyadEngineUrl) {
       const isEngineEnabled =
         settings.enableProSmartFilesContextMode ||
-        settings.enableProLazyEditsMode;
+        settings.enableProLazyEditsMode ||
+        settings.enableProWebSearch;
       const provider = isEngineEnabled
         ? createDyadEngine({
             apiKey: dyadApiKey,
@@ -143,6 +144,7 @@ export async function getModelClient(
               enableSmartFilesContext: settings.enableProSmartFilesContextMode,
               // Keep in sync with getCurrentValue in ProModeSelector.tsx
               smartContextMode: settings.proSmartContextOption ?? "balanced",
+              enableWebSearch: settings.enableProWebSearch,
             },
             settings,
           })
