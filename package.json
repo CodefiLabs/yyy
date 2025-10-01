@@ -25,7 +25,7 @@
     "build:distribution:prod": "cross-env DYAD_DISTRIBUTION_BUILD=true DYAD_DISTRIBUTION_PROXY_URL=https://app.vibeathon.us/api/v1 npm run package",
     "make:distribution:dev": "cross-env DYAD_DISTRIBUTION_BUILD=true DYAD_DISTRIBUTION_PROXY_URL=http://app.vibeathon.test/api/v1 npm run make",
     "make:distribution:prod": "cross-env DYAD_DISTRIBUTION_BUILD=true DYAD_DISTRIBUTION_PROXY_URL=https://app.vibeathon.us/api/v1 npm run make",
-    "start:distribution:dev": "cross-env DYAD_DISTRIBUTION_BUILD=true DYAD_DISTRIBUTION_PROXY_URL=http://app.vibeathon.test/api/v1 npm start",
+    "start:distribution:dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 DYAD_DISTRIBUTION_BUILD=true DYAD_DISTRIBUTION_PROXY_URL=https://app.vibeathon.test/api/v1 npm start",
     "start:distribution:prod": "cross-env DYAD_DISTRIBUTION_BUILD=true DYAD_DISTRIBUTION_PROXY_URL=https://app.vibeathon.us/api/v1 npm start",
     "publish": "npm run clean && electron-forge publish",
     "verify-release": "node scripts/verify-release-assets.js",

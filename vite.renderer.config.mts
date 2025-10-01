@@ -11,4 +11,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    // Inject environment variables for renderer process
+    'process.env.DYAD_DISTRIBUTION_BUILD': JSON.stringify(process.env.DYAD_DISTRIBUTION_BUILD),
+    'process.env.DYAD_DISTRIBUTION_PROXY_URL': JSON.stringify(process.env.DYAD_DISTRIBUTION_PROXY_URL),
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    // Polyfill for packages that expect Node.js globals
+    'global': 'globalThis',
+  },
 });

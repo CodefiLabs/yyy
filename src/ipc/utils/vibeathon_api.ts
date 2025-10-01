@@ -2,7 +2,7 @@ import { getEnvVar } from './read_env';
 
 const VIBEATHON_API_BASE = getEnvVar('DYAD_DISTRIBUTION_PROXY_URL') ||
   (process.env.NODE_ENV === 'development'
-    ? 'http://app.vibeathon.test/api/v1'
+    ? 'https://app.vibeathon.test/api/v1'
     : 'https://app.vibeathon.us/api/v1');
 
 export interface VibeathonApiKeysResponse {
@@ -21,7 +21,9 @@ export interface VibeathonSyncRequest {
 }
 
 export async function fetchFallbackApiKeys(vibeathonApiKey: string): Promise<VibeathonApiKeysResponse> {
-  const response = await fetch(`${VIBEATHON_API_BASE}/user/ai-keys`, {
+  const url = `${VIBEATHON_API_BASE}/user/ai-keys`;
+
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${vibeathonApiKey}`,
@@ -62,10 +64,17 @@ export async function fetchFallbackApiKeys(vibeathonApiKey: string): Promise<Vib
  */
 export async function validateVibeathonApiKey(vibeathonApiKey: string): Promise<boolean> {
   try {
+    console.log('[Vibeathon] Validating API key...');
+    console.log('[Vibeathon] API Base URL:', VIBEATHON_API_BASE);
+    console.log('[Vibeathon] Full URL:', `${VIBEATHON_API_BASE}/user/ai-keys`);
+
     // Reuse existing endpoint - if it returns data, key is valid
     await fetchFallbackApiKeys(vibeathonApiKey);
+    console.log('[Vibeathon] API key is valid');
     return true;
-  } catch {
+  } catch (error) {
+    console.error('[Vibeathon] API key validation failed:', error);
+    console.error('[Vibeathon] Error details:', error instanceof Error ? error.message : String(error));
     return false;
   }
 }

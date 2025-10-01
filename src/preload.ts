@@ -45,6 +45,8 @@ const validInvokeChannels = [
   "rename-app",
   "get-user-settings",
   "set-user-settings",
+  "settings:validateVibeathonKey",
+  "settings:fetchVibeathonKeys",
   "get-env-vars",
   "open-external-url",
   "show-item-in-folder",

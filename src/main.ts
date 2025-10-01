@@ -161,10 +161,21 @@ const createWindow = () => {
       path.join(__dirname, "../renderer/main_window/index.html"),
     );
   }
-  if (process.env.NODE_ENV === "development") {
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+  // Open DevTools - check if dev server is running (more reliable than NODE_ENV)
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    // Wait for page to load before opening devtools
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow?.webContents.openDevTools();
+    });
   }
+
+  // Add keyboard shortcut to manually open devtools
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12' || (input.meta && input.alt && input.key === 'i')) {
+      mainWindow?.webContents.toggleDevTools();
+      event.preventDefault();
+    }
+  });
 };
 
 const gotTheLock = app.requestSingleInstanceLock();

@@ -28,10 +28,14 @@ export function registerSettingsHandlers() {
 
   // Handler for validating Vibeathon API key
   ipcMain.handle("settings:validateVibeathonKey", async (_, vibeathonApiKey: string) => {
+    console.log('[Settings Handler] Validating Vibeathon API key...');
     if (!vibeathonApiKey) {
+      console.log('[Settings Handler] No API key provided');
       return false;
     }
-    return await validateVibeathonApiKey(vibeathonApiKey);
+    const result = await validateVibeathonApiKey(vibeathonApiKey);
+    console.log('[Settings Handler] Validation result:', result);
+    return result;
   });
 }
 

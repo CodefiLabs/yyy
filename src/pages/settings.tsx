@@ -12,7 +12,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useAppVersion } from "@/hooks/useAppVersion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "@tanstack/react-router";
+import { useRouter, Link } from "@tanstack/react-router";
 import { GitHubIntegration } from "@/components/GitHubIntegration";
 import { VercelIntegration } from "@/components/VercelIntegration";
 import { SupabaseIntegration } from "@/components/SupabaseIntegration";
@@ -25,8 +25,8 @@ import { ReleaseChannelSelector } from "@/components/ReleaseChannelSelector";
 import { NeonIntegration } from "@/components/NeonIntegration";
 import { RuntimeModeSelector } from "@/components/RuntimeModeSelector";
 import { ToolsMcpSettings } from "@/components/settings/ToolsMcpSettings";
-import { IS_DISTRIBUTION_BUILD } from "@/ipc/utils/distribution_utils";
-import { getVibeathonProxyUrl } from "@/ipc/utils/vibeathon_api";
+import { IS_DISTRIBUTION_BUILD, getVibeathonProxyUrl } from "@/ipc/utils/distribution_utils";
+import { warmValidationCache } from "@/hooks/useVibeathonKeyValidation";
 import { useEffect } from "react";
 
 export default function SettingsPage() {
@@ -345,7 +345,7 @@ export function VibeathonApiKeySection() {
   const [isValidating, setIsValidating] = useState(false);
   const [validationMessage, setValidationMessage] = useState<{
     type: 'success' | 'error';
-    text: string;
+    content: string | React.ReactNode;
   } | null>(null);
 
   useEffect(() => {
@@ -363,7 +363,11 @@ export function VibeathonApiKeySection() {
       const isValid = await IpcClient.getInstance().validateVibeathonKey(apiKey);
 
       if (isValid) {
-        // Save to settings
+        // Warm the validation cache immediately after successful validation
+        // This prevents re-validation when navigating to home page
+        warmValidationCache(apiKey);
+
+        // Save to settings and wait for it to complete
         await updateSettings({
           distributionMode: {
             ...settings?.distributionMode,
@@ -371,20 +375,33 @@ export function VibeathonApiKeySection() {
           },
         });
 
+        // Add a small delay to ensure settings are fully persisted
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         setValidationMessage({
           type: 'success',
-          text: 'API key validated and saved successfully!',
+          content: (
+            <>
+              API key validated and saved successfully!{' '}
+              <Link
+                to="/"
+                className="underline font-medium hover:text-green-900 dark:hover:text-green-200"
+              >
+                Go to Apps
+              </Link>
+            </>
+          ),
         });
       } else {
         setValidationMessage({
           type: 'error',
-          text: 'Invalid API key. Please check and try again.',
+          content: 'Invalid API key. Please check and try again.',
         });
       }
     } catch {
       setValidationMessage({
         type: 'error',
-        text: 'Error validating API key. Please try again.',
+        content: 'Error validating API key. Please try again.',
       });
     } finally {
       setIsValidating(false);
@@ -460,7 +477,7 @@ export function VibeathonApiKeySection() {
                 : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300'
             }`}
           >
-            {validationMessage.text}
+            {validationMessage.content}
           </div>
         )}
       </div>
