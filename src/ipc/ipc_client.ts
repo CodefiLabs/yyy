@@ -615,6 +615,16 @@ export class IpcClient {
     }
   }
 
+  // Validate Vibeathon API key
+  public async validateVibeathonKey(apiKey: string): Promise<boolean> {
+    try {
+      return await this.ipcRenderer.invoke("settings:validateVibeathonKey", apiKey);
+    } catch (error) {
+      showError(error);
+      throw error;
+    }
+  }
+
   // Delete an app and all its files
   public async deleteApp(appId: number): Promise<void> {
     await this.ipcRenderer.invoke("delete-app", { appId });

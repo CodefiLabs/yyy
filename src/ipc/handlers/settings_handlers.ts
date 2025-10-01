@@ -3,7 +3,7 @@ import type { UserSettings } from "../../lib/schemas";
 import { writeSettings } from "../../main/settings";
 import { readSettings } from "../../main/settings";
 import { IS_DISTRIBUTION_BUILD, getVibeathonProxyUrl } from "../utils/distribution_utils";
-import { fetchFallbackApiKeys } from "../utils/vibeathon_api";
+import { fetchFallbackApiKeys, validateVibeathonApiKey } from "../utils/vibeathon_api";
 
 export function registerSettingsHandlers() {
   // Intentionally do NOT use handle because it could log sensitive data from the return value.
@@ -24,6 +24,14 @@ export function registerSettingsHandlers() {
   // Handler for fetching Vibeathon fallback keys
   ipcMain.handle("settings:fetchVibeathonKeys", async () => {
     return fetchVibeathonFallbackKeys();
+  });
+
+  // Handler for validating Vibeathon API key
+  ipcMain.handle("settings:validateVibeathonKey", async (_, vibeathonApiKey: string) => {
+    if (!vibeathonApiKey) {
+      return false;
+    }
+    return await validateVibeathonApiKey(vibeathonApiKey);
   });
 }
 

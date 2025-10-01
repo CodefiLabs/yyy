@@ -29,6 +29,7 @@ import { ImportAppButton } from "@/components/ImportAppButton";
 import { showError } from "@/lib/toast";
 import { invalidateAppQuery } from "@/hooks/useLoadApp";
 import { useQueryClient } from "@tanstack/react-query";
+import { useVibeathonKeyValidation } from "@/hooks/useVibeathonKeyValidation";
 
 import type { FileAttachment } from "@/ipc/ipc_types";
 import { NEON_TEMPLATE_IDS } from "@/shared/templates";
@@ -41,6 +42,9 @@ export interface HomeSubmitOptions {
 }
 
 export default function HomePage() {
+  // Validate Vibeathon API key on initial load (distribution builds only)
+  const { isValidating } = useVibeathonKeyValidation();
+
   const [inputValue, setInputValue] = useAtom(homeChatInputValueAtom);
   const navigate = useNavigate();
   const search = useSearch({ from: "/" });
@@ -158,6 +162,21 @@ export default function HomePage() {
     }
     // No finally block needed for setIsLoading(false) here if navigation happens on success
   };
+
+  // Show loading while validating Vibeathon API key
+  if (isValidating) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-16 h-16 mb-4 mx-auto">
+            <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
+            <div className="absolute top-0 left-0 w-full h-full border-4 border-t-primary rounded-full animate-spin"></div>
+          </div>
+          <div className="mb-4 text-gray-600 dark:text-gray-400">Validating...</div>
+        </div>
+      </div>
+    );
+  }
 
   // Loading overlay for app creation
   if (isLoading) {

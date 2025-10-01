@@ -54,6 +54,22 @@ export async function fetchFallbackApiKeys(vibeathonApiKey: string): Promise<Vib
   return data as VibeathonApiKeysResponse;
 }
 
+/**
+ * Validates a Vibeathon API key by making a lightweight API call
+ * Uses the existing /user/ai-keys endpoint to check if the key is valid
+ * @param vibeathonApiKey - The API key to validate
+ * @returns true if valid, false otherwise
+ */
+export async function validateVibeathonApiKey(vibeathonApiKey: string): Promise<boolean> {
+  try {
+    // Reuse existing endpoint - if it returns data, key is valid
+    await fetchFallbackApiKeys(vibeathonApiKey);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export async function fetchVibeathonApi(endpoint: string, options: RequestInit = {}): Promise<Response> {
   const url = `${VIBEATHON_API_BASE}${endpoint}`;
 
