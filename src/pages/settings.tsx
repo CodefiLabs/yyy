@@ -25,6 +25,9 @@ import { ReleaseChannelSelector } from "@/components/ReleaseChannelSelector";
 import { NeonIntegration } from "@/components/NeonIntegration";
 import { RuntimeModeSelector } from "@/components/RuntimeModeSelector";
 import { ToolsMcpSettings } from "@/components/settings/ToolsMcpSettings";
+import { IS_DISTRIBUTION_BUILD } from "@/ipc/utils/distribution_utils";
+import { getVibeathonProxyUrl } from "@/ipc/utils/vibeathon_api";
+import { useEffect } from "react";
 
 export default function SettingsPage() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -69,6 +72,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-6">
+          <VibeathonApiKeySection />
           <GeneralSettings appVersion={appVersion} />
           <WorkflowSettings />
           <AISettings />
@@ -325,6 +329,140 @@ export function AISettings() {
 
       <div className="mt-4">
         <MaxChatTurnsSelector />
+      </div>
+    </div>
+  );
+}
+
+export function VibeathonApiKeySection() {
+  // Only show in distribution builds
+  if (!IS_DISTRIBUTION_BUILD) {
+    return null;
+  }
+
+  const { settings, updateSettings } = useSettings();
+  const [apiKey, setApiKey] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const currentKey = settings?.distributionMode?.vibeathonApiKey?.value;
+    if (currentKey) {
+      setApiKey(currentKey);
+    }
+  }, [settings]);
+
+  const handleSave = async () => {
+    setIsValidating(true);
+    setValidationMessage(null);
+
+    try {
+      const isValid = await IpcClient.getInstance().validateVibeathonKey(apiKey);
+
+      if (isValid) {
+        // Save to settings
+        await updateSettings({
+          distributionMode: {
+            ...settings?.distributionMode,
+            vibeathonApiKey: { value: apiKey },
+          },
+        });
+
+        setValidationMessage({
+          type: 'success',
+          text: 'API key validated and saved successfully!',
+        });
+      } else {
+        setValidationMessage({
+          type: 'error',
+          text: 'Invalid API key. Please check and try again.',
+        });
+      }
+    } catch (error) {
+      setValidationMessage({
+        type: 'error',
+        text: 'Error validating API key. Please try again.',
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  // Determine environment-aware URL
+  const vibeathonUrl = getVibeathonProxyUrl().includes('vibeathon.test')
+    ? 'app.vibeathon.test'
+    : 'app.vibeathon.us';
+
+  return (
+    <div
+      id="vibeathon-api-key"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
+    >
+      <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        Vibeathon API Key
+      </h2>
+
+      <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+          Copy your API key from{' '}
+          <a
+            href={`https://${vibeathonUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {vibeathonUrl}
+          </a>
+        </p>
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+          Note: If the Vibeathon event is over, download the full version of Dyad at{' '}
+          <a
+            href="https://www.dyad.sh/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            dyad.sh
+          </a>
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            API Key
+          </label>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Enter your Vibeathon API key"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+
+        <button
+          onClick={handleSave}
+          disabled={isValidating || !apiKey}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isValidating ? 'Validating...' : 'Validate & Save'}
+        </button>
+
+        {validationMessage && (
+          <div
+            className={`p-3 rounded-md ${
+              validationMessage.type === 'success'
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300'
+                : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300'
+            }`}
+          >
+            {validationMessage.text}
+          </div>
+        )}
       </div>
     </div>
   );

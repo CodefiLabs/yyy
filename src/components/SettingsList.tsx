@@ -6,8 +6,10 @@ import { useAtom } from "jotai";
 import { activeSettingsSectionAtom } from "@/atoms/viewAtoms";
 import { shouldHideFeature } from '@/lib/schemas';
 import { useSettings } from '@/hooks/useSettings';
+import { IS_DISTRIBUTION_BUILD } from '@/ipc/utils/distribution_utils';
 
 const SETTINGS_SECTIONS = [
+  ...(IS_DISTRIBUTION_BUILD ? [{ id: "vibeathon-api-key", label: "Vibeathon API Key" }] : []),
   { id: "general-settings", label: "General" },
   { id: "workflow-settings", label: "Workflow" },
   { id: "ai-settings", label: "AI" },
