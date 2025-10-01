@@ -65,7 +65,7 @@ export async function validateVibeathonApiKey(vibeathonApiKey: string): Promise<
     // Reuse existing endpoint - if it returns data, key is valid
     await fetchFallbackApiKeys(vibeathonApiKey);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

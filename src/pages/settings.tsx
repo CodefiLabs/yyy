@@ -381,7 +381,7 @@ export function VibeathonApiKeySection() {
           text: 'Invalid API key. Please check and try again.',
         });
       }
-    } catch (error) {
+    } catch {
       setValidationMessage({
         type: 'error',
         text: 'Error validating API key. Please try again.',
