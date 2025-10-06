@@ -7,6 +7,9 @@ export const prompts = sqliteTable("prompts", {
   title: text("title").notNull(),
   description: text("description"),
   content: text("content").notNull(),
+  isReadOnly: integer("is_read_only", { mode: "boolean" })
+    .notNull()
+    .default(sql`0`),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),

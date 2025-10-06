@@ -3,5 +3,6 @@
     "additionalDirectories": [
       "/Users/kk/Sites/codefi/app-vibeathon-us/"
     ]
-  }
+  },
+  "spinnerTipsEnabled": false
 }

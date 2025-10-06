@@ -10,6 +10,8 @@ import path from "node:path";
 import fs from "node:fs";
 import { getDyadAppPath, getUserDataPath } from "../paths/paths";
 import log from "electron-log";
+import { app } from "electron";
+import { seedDefaultPrompts } from "./seed_prompts";
 
 const logger = log.scope("db");
 
@@ -65,6 +67,14 @@ export function initializeDatabase(): BetterSQLite3Database<typeof schema> & {
     }
   } catch (error) {
     logger.error("Migration error:", error);
+  }
+
+  // Seed default prompts (only in production builds with resources)
+  if (app.isPackaged) {
+    const resourcesPath = process.resourcesPath;
+    seedDefaultPrompts(_db, resourcesPath).catch((error) => {
+      logger.error("Error seeding default prompts:", error);
+    });
   }
 
   return _db as any;

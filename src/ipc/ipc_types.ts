@@ -365,6 +365,7 @@ export interface PromptDto {
   title: string;
   description: string | null;
   content: string;
+  isReadOnly: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

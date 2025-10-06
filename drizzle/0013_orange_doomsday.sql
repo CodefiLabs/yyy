@@ -1,0 +1,1 @@
+ALTER TABLE `prompts` ADD `is_read_only` integer DEFAULT 0 NOT NULL;

@@ -21,6 +21,7 @@ export function registerPromptHandlers() {
       title: r.title,
       description: r.description ?? null,
       content: r.content,
+      isReadOnly: r.isReadOnly,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     }));
@@ -53,6 +54,7 @@ export function registerPromptHandlers() {
         title: row.title,
         description: row.description ?? null,
         content: row.content,
+        isReadOnly: row.isReadOnly,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       };
@@ -68,6 +70,16 @@ export function registerPromptHandlers() {
       const { id, title, description, content } = params;
       if (!id) throw new Error("Prompt id is required");
       if (!title || !content) throw new Error("Title and content are required");
+
+      // Check if prompt is read-only
+      const prompt = db.select().from(prompts).where(eq(prompts.id, id)).get();
+      if (!prompt) {
+        throw new Error(`Prompt with id ${id} not found`);
+      }
+      if (prompt.isReadOnly) {
+        throw new Error("Cannot edit read-only prompts");
+      }
+
       const now = new Date();
       db.update(prompts)
         .set({
@@ -85,6 +97,16 @@ export function registerPromptHandlers() {
     "prompts:delete",
     async (_e: IpcMainInvokeEvent, id: number): Promise<void> => {
       if (!id) throw new Error("Prompt id is required");
+
+      // Check if prompt is read-only
+      const prompt = db.select().from(prompts).where(eq(prompts.id, id)).get();
+      if (!prompt) {
+        throw new Error(`Prompt with id ${id} not found`);
+      }
+      if (prompt.isReadOnly) {
+        throw new Error("Cannot delete read-only prompts");
+      }
+
       db.delete(prompts).where(eq(prompts.id, id)).run();
     },
   );

@@ -5,6 +5,7 @@ import {
   CreateOrEditPromptDialog,
 } from "@/components/CreatePromptDialog";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { Badge } from "@/components/ui/badge";
 
 export default function LibraryPage() {
   const { prompts, isLoading, createPrompt, updatePrompt, deletePrompt } =
@@ -51,6 +52,7 @@ function PromptCard({
     title: string;
     description: string | null;
     content: string;
+    isReadOnly: boolean;
   };
   onUpdate: (p: {
     id: number;
@@ -67,26 +69,35 @@ function PromptCard({
     >
       <div className="space-y-2">
         <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">{prompt.title}</h3>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold">{prompt.title}</h3>
+              {prompt.isReadOnly && (
+                <Badge variant="secondary" className="text-xs">
+                  Read-only
+                </Badge>
+              )}
+            </div>
             {prompt.description && (
               <p className="text-sm text-muted-foreground">
                 {prompt.description}
               </p>
             )}
           </div>
-          <div className="flex gap-2">
-            <CreateOrEditPromptDialog
-              mode="edit"
-              prompt={prompt}
-              onUpdatePrompt={onUpdate}
-            />
-            <DeleteConfirmationDialog
-              itemName={prompt.title}
-              itemType="Prompt"
-              onDelete={() => onDelete(prompt.id)}
-            />
-          </div>
+          {!prompt.isReadOnly && (
+            <div className="flex gap-2">
+              <CreateOrEditPromptDialog
+                mode="edit"
+                prompt={prompt}
+                onUpdatePrompt={onUpdate}
+              />
+              <DeleteConfirmationDialog
+                itemName={prompt.title}
+                itemType="Prompt"
+                onDelete={() => onDelete(prompt.id)}
+              />
+            </div>
+          )}
         </div>
         <pre className="text-sm whitespace-pre-wrap bg-transparent border rounded p-2 max-h-48 overflow-auto">
           {prompt.content}
