@@ -22,6 +22,18 @@ No sign-up required. Just download and go.
 
 Join our growing community of AI app builders on **Reddit**: [r/dyadbuilders](https://www.reddit.com/r/dyadbuilders/) - share your projects and get help from the community!
 
+## 🧪 Testing Distribution Build
+
+To test the Vibeathon proxy integration locally:
+
+```bash
+export DYAD_DISTRIBUTION_BUILD=true
+export DYAD_DISTRIBUTION_PROXY_URL=http://app.vibeathon.test/api/v1
+npm run test:proxy
+```
+
+See [docs/vibeathon-proxy-testing.md](docs/vibeathon-proxy-testing.md) for the detailed testing procedure.
+
 ## 🛠️ Contributing
 
 **Dyad** is open-source (Apache 2.0 licensed).
