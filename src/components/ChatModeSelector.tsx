@@ -58,7 +58,7 @@ export function ChatModeSelector() {
               value="ask"
               aria-label="Ask mode"
               data-testid="chat-mode-ask"
-              className="h-8 px-2.5 text-xs rounded-r-none border-r-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              className="h-8 px-2.5 text-xs rounded-r-none border-r-0 aria-checked:bg-primary aria-checked:text-primary-foreground"
             >
               <MessageCircleQuestion className="size-4" />
             </ToggleGroupItem>
@@ -81,7 +81,7 @@ export function ChatModeSelector() {
               value="agent"
               aria-label="Agent mode"
               data-testid="chat-mode-agent"
-              className="h-8 px-2.5 text-xs rounded-l-none data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              className="h-8 px-2.5 text-xs rounded-l-none aria-checked:bg-primary aria-checked:text-primary-foreground"
             >
               <Bot className="size-4" />
             </ToggleGroupItem>
