@@ -84,45 +84,49 @@ export default function SettingsPage() {
             <ProviderSettingsGrid />
           </div>
 
-          <div className="space-y-6">
+          {!IS_DISTRIBUTION_BUILD && (
+            <div className="space-y-6">
+              <div
+                id="telemetry"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
+              >
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                  Telemetry
+                </h2>
+                <div className="space-y-2">
+                  <TelemetrySwitch />
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    This records anonymous usage data to improve the product.
+                  </div>
+                </div>
+
+                <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span className="mr-2 font-medium">Telemetry ID:</span>
+                  <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200 font-mono">
+                    {settings ? settings.telemetryUserId : "n/a"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Integrations Section */}
+          {!IS_DISTRIBUTION_BUILD && (
             <div
-              id="telemetry"
+              id="integrations"
               className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
             >
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Telemetry
+                Integrations
               </h2>
-              <div className="space-y-2">
-                <TelemetrySwitch />
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  This records anonymous usage data to improve the product.
-                </div>
-              </div>
-
-              <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <span className="mr-2 font-medium">Telemetry ID:</span>
-                <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200 font-mono">
-                  {settings ? settings.telemetryUserId : "n/a"}
-                </span>
+              <div className="space-y-4">
+                <GitHubIntegration />
+                <VercelIntegration />
+                <SupabaseIntegration />
+                <NeonIntegration />
               </div>
             </div>
-          </div>
-
-          {/* Integrations Section */}
-          <div
-            id="integrations"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
-          >
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Integrations
-            </h2>
-            <div className="space-y-4">
-              <GitHubIntegration />
-              <VercelIntegration />
-              <SupabaseIntegration />
-              <NeonIntegration />
-            </div>
-          </div>
+          )}
 
           {/* Tools (MCP) */}
           <div

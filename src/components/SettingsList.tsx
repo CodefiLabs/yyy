@@ -14,8 +14,10 @@ const SETTINGS_SECTIONS = [
   { id: "workflow-settings", label: "Workflow" },
   { id: "ai-settings", label: "AI" },
   { id: "provider-settings", label: "Model Providers" },
-  { id: "telemetry", label: "Telemetry" },
-  { id: "integrations", label: "Integrations" },
+  ...(!IS_DISTRIBUTION_BUILD ? [
+    { id: "telemetry", label: "Telemetry" },
+    { id: "integrations", label: "Integrations" },
+  ] : []),
   { id: "tools-mcp", label: "Tools (MCP)" },
   { id: "experiments", label: "Experiments" },
   { id: "danger-zone", label: "Danger Zone" },
