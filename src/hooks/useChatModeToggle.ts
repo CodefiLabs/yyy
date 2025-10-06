@@ -3,7 +3,7 @@ import { useSettings } from "./useSettings";
 import { useShortcut } from "./useShortcut";
 import { usePostHog } from "posthog-js/react";
 import { ChatModeSchema, type ChatMode } from "../lib/schemas";
-import { HIDE_BUILD_MODE } from "../ipc/utils/distribution_utils";
+import { IS_DISTRIBUTION_BUILD, HIDE_BUILD_MODE } from "../ipc/utils/distribution_utils";
 
 export function useChatModeToggle() {
   const { settings, updateSettings } = useSettings();
@@ -27,8 +27,9 @@ export function useChatModeToggle() {
 
     const currentMode = settings.selectedChatMode;
     let newMode: ChatMode;
+    const shouldHideBuildMode = IS_DISTRIBUTION_BUILD || HIDE_BUILD_MODE;
 
-    if (HIDE_BUILD_MODE) {
+    if (shouldHideBuildMode) {
       // Hide Build mode: toggle between ask and agent only
       newMode = currentMode === "ask" ? "agent" : "ask";
     } else {
