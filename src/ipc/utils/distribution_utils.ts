@@ -1,6 +1,9 @@
 // Distribution build detection following IS_TEST_BUILD pattern
 export const IS_DISTRIBUTION_BUILD = process.env.DYAD_DISTRIBUTION_BUILD === "true";
 
+// Hide Build mode (show only Ask/Agent toggle)
+export const HIDE_BUILD_MODE = process.env.DYAD_HIDE_BUILD_MODE === "true";
+
 // Feature key definitions for semantic feature detection
 export const DISTRIBUTION_FEATURE_KEYS = {
   PRO_BANNER: 'pro-banner',

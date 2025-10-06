@@ -15,12 +15,12 @@ import { useSettings } from "@/hooks/useSettings";
 import type { ChatMode } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { detectIsMac } from "@/hooks/useChatModeToggle";
-import { IS_DISTRIBUTION_BUILD } from "@/ipc/utils/distribution_utils";
+import { HIDE_BUILD_MODE } from "@/ipc/utils/distribution_utils";
 
 export function ChatModeSelector() {
   const { settings, updateSettings } = useSettings();
 
-  const selectedMode = settings?.selectedChatMode || (IS_DISTRIBUTION_BUILD ? "ask" : "build");
+  const selectedMode = settings?.selectedChatMode || (HIDE_BUILD_MODE ? "ask" : "build");
 
   const handleModeChange = (value: string) => {
     updateSettings({ selectedChatMode: value as ChatMode });
@@ -35,13 +35,13 @@ export function ChatModeSelector() {
       case "agent":
         return "Agent";
       default:
-        return IS_DISTRIBUTION_BUILD ? "Ask" : "Build";
+        return HIDE_BUILD_MODE ? "Ask" : "Build";
     }
   };
   const isMac = detectIsMac();
 
-  // Distribution mode: simple toggle buttons
-  if (IS_DISTRIBUTION_BUILD) {
+  // Hide Build mode: simple toggle buttons for Ask/Agent only
+  if (HIDE_BUILD_MODE) {
     return (
       <div className="flex items-center gap-1">
         <Tooltip>

@@ -2,7 +2,7 @@ import { ipcMain } from "electron";
 import type { UserSettings } from "../../lib/schemas";
 import { writeSettings } from "../../main/settings";
 import { readSettings } from "../../main/settings";
-import { IS_DISTRIBUTION_BUILD, getVibeathonProxyUrl } from "../utils/distribution_utils";
+import { IS_DISTRIBUTION_BUILD, HIDE_BUILD_MODE, getVibeathonProxyUrl } from "../utils/distribution_utils";
 import { fetchFallbackApiKeys, validateVibeathonApiKey } from "../utils/vibeathon_api";
 
 export function registerSettingsHandlers() {
@@ -80,9 +80,9 @@ export async function fetchVibeathonFallbackKeys(): Promise<void> {
 }
 
 export async function initializeDistributionSettings(): Promise<void> {
-  if (IS_DISTRIBUTION_BUILD) {
-    const currentSettings = readSettings();
+  const currentSettings = readSettings();
 
+  if (IS_DISTRIBUTION_BUILD) {
     // Only set if not already configured
     if (!currentSettings.distributionMode) {
       const proxyBaseUrl = getVibeathonProxyUrl();
@@ -104,5 +104,10 @@ export async function initializeDistributionSettings(): Promise<void> {
         selectedChatMode: currentSettings.selectedChatMode || "ask",
       });
     }
+  } else if (HIDE_BUILD_MODE && !currentSettings.selectedChatMode) {
+    // If hiding build mode but not in distribution, set default to "ask"
+    writeSettings({
+      selectedChatMode: "ask",
+    });
   }
 }
