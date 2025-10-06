@@ -49,6 +49,7 @@ export function ChatModeSelector() {
         type="single"
         value={selectedMode}
         onValueChange={(value) => value && handleModeChange(value)}
+        variant="outline"
         className="gap-0"
       >
         <Tooltip>
@@ -65,10 +66,10 @@ export function ChatModeSelector() {
           <TooltipContent>
             <div className="flex flex-col">
               <span className="font-medium">Ask</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs opacity-90">
                 Ask questions about the app
               </span>
-              <span className="text-xs text-muted-foreground mt-1">
+              <span className="text-xs opacity-75 mt-1">
                 {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
               </span>
             </div>
@@ -88,10 +89,10 @@ export function ChatModeSelector() {
           <TooltipContent>
             <div className="flex flex-col">
               <span className="font-medium">Agent</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs opacity-90">
                 Use tools (MCP) and generate code
               </span>
-              <span className="text-xs text-muted-foreground mt-1">
+              <span className="text-xs opacity-75 mt-1">
                 {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
               </span>
             </div>
