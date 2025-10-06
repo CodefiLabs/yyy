@@ -2,7 +2,8 @@ import { useCallback, useMemo } from "react";
 import { useSettings } from "./useSettings";
 import { useShortcut } from "./useShortcut";
 import { usePostHog } from "posthog-js/react";
-import { ChatModeSchema } from "../lib/schemas";
+import { ChatModeSchema, type ChatMode } from "../lib/schemas";
+import { IS_DISTRIBUTION_BUILD } from "../ipc/utils/distribution_utils";
 
 export function useChatModeToggle() {
   const { settings, updateSettings } = useSettings();
@@ -25,9 +26,17 @@ export function useChatModeToggle() {
     if (!settings || !settings.selectedChatMode) return;
 
     const currentMode = settings.selectedChatMode;
-    const modes = ChatModeSchema.options;
-    const currentIndex = modes.indexOf(settings.selectedChatMode);
-    const newMode = modes[(currentIndex + 1) % modes.length];
+    let newMode: ChatMode;
+
+    if (IS_DISTRIBUTION_BUILD) {
+      // In distribution: toggle between ask and agent only
+      newMode = currentMode === "ask" ? "agent" : "ask";
+    } else {
+      // Normal: cycle through all three modes
+      const modes = ChatModeSchema.options;
+      const currentIndex = modes.indexOf(settings.selectedChatMode);
+      newMode = modes[(currentIndex + 1) % modes.length];
+    }
 
     updateSettings({ selectedChatMode: newMode });
     posthog.capture("chat:mode_toggle", {

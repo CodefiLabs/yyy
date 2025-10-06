@@ -99,7 +99,9 @@ export async function initializeDistributionSettings(): Promise<void> {
             retryCount: 0,
             useFallback: false,
           }
-        }
+        },
+        // Set default chat mode to "ask" for distribution
+        selectedChatMode: currentSettings.selectedChatMode || "ask",
       });
     }
   }

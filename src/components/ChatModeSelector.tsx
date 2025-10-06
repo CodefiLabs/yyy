@@ -10,15 +10,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/useSettings";
 import type { ChatMode } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { detectIsMac } from "@/hooks/useChatModeToggle";
+import { IS_DISTRIBUTION_BUILD } from "@/ipc/utils/distribution_utils";
 
 export function ChatModeSelector() {
   const { settings, updateSettings } = useSettings();
 
-  const selectedMode = settings?.selectedChatMode || "build";
+  const selectedMode = settings?.selectedChatMode || (IS_DISTRIBUTION_BUILD ? "ask" : "build");
 
   const handleModeChange = (value: string) => {
     updateSettings({ selectedChatMode: value as ChatMode });
@@ -33,11 +35,56 @@ export function ChatModeSelector() {
       case "agent":
         return "Agent";
       default:
-        return "Build";
+        return IS_DISTRIBUTION_BUILD ? "Ask" : "Build";
     }
   };
   const isMac = detectIsMac();
 
+  // Distribution mode: simple toggle buttons
+  if (IS_DISTRIBUTION_BUILD) {
+    return (
+      <div className="flex items-center gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={selectedMode === "ask" ? "default" : "outline"}
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => handleModeChange("ask")}
+              data-testid="chat-mode-ask"
+            >
+              Ask
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <span className="text-xs text-gray-200 dark:text-gray-500">
+              {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
+            </span>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={selectedMode === "agent" ? "default" : "outline"}
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => handleModeChange("agent")}
+              data-testid="chat-mode-agent"
+            >
+              Agent
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <span className="text-xs text-gray-200 dark:text-gray-500">
+              {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
+            </span>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    );
+  }
+
+  // Normal mode: dropdown with all 3 options
   return (
     <Select value={selectedMode} onValueChange={handleModeChange}>
       <Tooltip>
