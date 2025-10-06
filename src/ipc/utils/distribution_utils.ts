@@ -27,8 +27,9 @@ export function getVibeathonProxyUrl(): string {
   }
 
   // Default based on NODE_ENV
+  // Always use HTTPS to avoid 301 redirects that can lose request body (tools)
   return process.env.NODE_ENV === 'development'
-    ? 'http://app.vibeathon.test/api/v1'
+    ? 'https://app.vibeathon.test/api/v1'
     : 'https://app.vibeathon.us/api/v1';
 }
 
