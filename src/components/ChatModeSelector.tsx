@@ -10,12 +10,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useSettings } from "@/hooks/useSettings";
 import type { ChatMode } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { detectIsMac } from "@/hooks/useChatModeToggle";
 import { IS_DISTRIBUTION_BUILD, HIDE_BUILD_MODE } from "@/ipc/utils/distribution_utils";
+import { MessageCircleQuestion, Bot } from "lucide-react";
 
 export function ChatModeSelector() {
   const { settings, updateSettings } = useSettings();
@@ -41,47 +42,62 @@ export function ChatModeSelector() {
   };
   const isMac = detectIsMac();
 
-  // Hide Build mode: simple toggle buttons for Ask/Agent only
+  // Hide Build mode: icon button group for Ask/Agent only
   if (shouldHideBuildMode) {
     return (
-      <div className="flex items-center gap-1">
+      <ToggleGroup
+        type="single"
+        value={selectedMode}
+        onValueChange={(value) => value && handleModeChange(value)}
+        className="gap-0"
+      >
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant={selectedMode === "ask" ? "default" : "outline"}
-              size="sm"
-              className="h-6 px-2 text-xs"
-              onClick={() => handleModeChange("ask")}
+            <ToggleGroupItem
+              value="ask"
+              aria-label="Ask mode"
               data-testid="chat-mode-ask"
+              className="h-6 px-2 text-xs rounded-r-none border-r-0"
             >
-              Ask
-            </Button>
+              <MessageCircleQuestion className="h-3.5 w-3.5" />
+            </ToggleGroupItem>
           </TooltipTrigger>
           <TooltipContent>
-            <span className="text-xs text-gray-200 dark:text-gray-500">
-              {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
-            </span>
+            <div className="flex flex-col">
+              <span className="font-medium">Ask</span>
+              <span className="text-xs text-muted-foreground">
+                Ask questions about the app
+              </span>
+              <span className="text-xs text-muted-foreground mt-1">
+                {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
+              </span>
+            </div>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant={selectedMode === "agent" ? "default" : "outline"}
-              size="sm"
-              className="h-6 px-2 text-xs"
-              onClick={() => handleModeChange("agent")}
+            <ToggleGroupItem
+              value="agent"
+              aria-label="Agent mode"
               data-testid="chat-mode-agent"
+              className="h-6 px-2 text-xs rounded-l-none"
             >
-              Agent
-            </Button>
+              <Bot className="h-3.5 w-3.5" />
+            </ToggleGroupItem>
           </TooltipTrigger>
           <TooltipContent>
-            <span className="text-xs text-gray-200 dark:text-gray-500">
-              {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
-            </span>
+            <div className="flex flex-col">
+              <span className="font-medium">Agent</span>
+              <span className="text-xs text-muted-foreground">
+                Use tools (MCP) and generate code
+              </span>
+              <span className="text-xs text-muted-foreground mt-1">
+                {isMac ? "⌘ + ." : "Ctrl + ."} to toggle
+              </span>
+            </div>
           </TooltipContent>
         </Tooltip>
-      </div>
+      </ToggleGroup>
     );
   }
 
