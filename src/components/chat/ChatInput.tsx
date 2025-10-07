@@ -483,7 +483,6 @@ function WriteCodeProperlyButton() {
 
 function RebuildButton() {
   const { restartApp } = useRunApp();
-  const posthog = usePostHog();
   const selectedAppId = useAtomValue(selectedAppIdAtom);
 
   const onClick = useCallback(async () => {
@@ -491,7 +490,7 @@ function RebuildButton() {
 
     captureEvent("action:rebuild");
     await restartApp({ removeNodeModules: true });
-  }, [selectedAppId, posthog, restartApp]);
+  }, [selectedAppId, restartApp]);
 
   return (
     <SuggestionButton onClick={onClick} tooltipText="Rebuild the application">
@@ -502,7 +501,6 @@ function RebuildButton() {
 
 function RestartButton() {
   const { restartApp } = useRunApp();
-  const posthog = usePostHog();
   const selectedAppId = useAtomValue(selectedAppIdAtom);
 
   const onClick = useCallback(async () => {
@@ -510,7 +508,7 @@ function RestartButton() {
 
     captureEvent("action:restart");
     await restartApp();
-  }, [selectedAppId, posthog, restartApp]);
+  }, [selectedAppId, restartApp]);
 
   return (
     <SuggestionButton
@@ -524,12 +522,11 @@ function RestartButton() {
 
 function RefreshButton() {
   const { refreshAppIframe } = useRunApp();
-  const posthog = usePostHog();
 
   const onClick = useCallback(() => {
     captureEvent("action:refresh");
     refreshAppIframe();
-  }, [posthog, refreshAppIframe]);
+  }, [refreshAppIframe]);
 
   return (
     <SuggestionButton
