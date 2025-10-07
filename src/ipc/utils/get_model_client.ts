@@ -92,12 +92,16 @@ export async function getModelClient(
         proxyUrl: proxySettings.baseUrl
       });
 
+      // Create OpenAI-compatible client for Vibeathon proxy
+      // Use .chat() to ensure it calls /chat/completions endpoint
+      const provider = createOpenAI({
+        name: 'vibeathon-proxy',
+        baseURL: proxySettings.baseUrl,
+        apiKey: vibeathonApiKey,
+      });
+
       const vibeathonClient = {
-        model: createOpenAI({
-          name: 'vibeathon-proxy',
-          baseURL: proxySettings.baseUrl,
-          apiKey: vibeathonApiKey,
-        })(model.name),
+        model: provider.chat(model.name),
         builtinProviderId: model.provider,
       };
 

@@ -83,10 +83,11 @@ export async function initializeDistributionSettings(): Promise<void> {
   const currentSettings = readSettings();
 
   if (IS_DISTRIBUTION_BUILD) {
-    // Only set if not already configured
-    if (!currentSettings.distributionMode) {
-      const proxyBaseUrl = getVibeathonProxyUrl();
+    const proxyBaseUrl = getVibeathonProxyUrl();
 
+    // Initialize or update distribution mode settings
+    if (!currentSettings.distributionMode) {
+      // First-time initialization
       writeSettings({
         distributionMode: {
           hideCommercialFeatures: true,
@@ -102,6 +103,19 @@ export async function initializeDistributionSettings(): Promise<void> {
         },
         // Set default chat mode to "ask" for distribution
         selectedChatMode: currentSettings.selectedChatMode || "ask",
+      });
+    } else if (!currentSettings.distributionMode.proxySettings) {
+      // Update existing distribution mode to add missing proxy settings
+      writeSettings({
+        distributionMode: {
+          ...currentSettings.distributionMode,
+          proxySettings: {
+            enabled: true,
+            baseUrl: proxyBaseUrl,
+            retryCount: 0,
+            useFallback: false,
+          }
+        }
       });
     }
   } else if (HIDE_BUILD_MODE && !currentSettings.selectedChatMode) {
