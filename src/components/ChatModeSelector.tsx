@@ -16,7 +16,7 @@ import type { ChatMode } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { detectIsMac } from "@/hooks/useChatModeToggle";
 import { IS_DISTRIBUTION_BUILD, HIDE_BUILD_MODE } from "@/ipc/utils/distribution_utils";
-import { MessageCircleQuestion, Bot } from "lucide-react";
+import { MessageCircleQuestion, Bot, Code } from "lucide-react";
 
 export function ChatModeSelector() {
   const { settings, updateSettings } = useSettings();
@@ -42,7 +42,7 @@ export function ChatModeSelector() {
   };
   const isMac = detectIsMac();
 
-  // Hide Build mode: icon button group for Ask/Agent only
+  // Distribution mode: icon button group for Ask/Build only
   if (shouldHideBuildMode) {
     return (
       <ToggleGroup
@@ -78,19 +78,19 @@ export function ChatModeSelector() {
         <Tooltip>
           <TooltipTrigger asChild>
             <ToggleGroupItem
-              value="agent"
-              aria-label="Agent mode"
-              data-testid="chat-mode-agent"
+              value="build"
+              aria-label="Build mode"
+              data-testid="chat-mode-build"
               className="h-8 px-2.5 text-xs rounded-l-none aria-checked:bg-primary aria-checked:text-primary-foreground"
             >
-              <Bot className="size-4" />
+              <Code className="size-4" />
             </ToggleGroupItem>
           </TooltipTrigger>
           <TooltipContent>
             <div className="flex flex-col">
-              <span className="font-medium">Agent</span>
+              <span className="font-medium">Build</span>
               <span className="text-xs opacity-90">
-                Use tools (MCP) and generate code
+                Generate and edit code
               </span>
               <span className="text-xs opacity-75 mt-1">
                 {isMac ? "⌘ + ." : "Ctrl + ."} to toggle

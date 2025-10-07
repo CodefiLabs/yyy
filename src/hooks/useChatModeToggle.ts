@@ -29,8 +29,8 @@ export function useChatModeToggle() {
     const shouldHideBuildMode = IS_DISTRIBUTION_BUILD || HIDE_BUILD_MODE;
 
     if (shouldHideBuildMode) {
-      // Hide Build mode: toggle between ask and agent only
-      newMode = currentMode === "ask" ? "agent" : "ask";
+      // Distribution mode: toggle between ask and build only
+      newMode = currentMode === "ask" ? "build" : "ask";
     } else {
       // Normal: cycle through all three modes
       const modes = ChatModeSchema.options;
