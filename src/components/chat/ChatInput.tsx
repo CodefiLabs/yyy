@@ -304,27 +304,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
               excludeCurrentApp={true}
             />
 
-            {isStreaming ? (
-              <button
-                onClick={handleCancel}
-                className="px-2 py-2 mt-1 mr-1 hover:bg-(--background-darkest) text-(--sidebar-accent-fg) rounded-lg"
-                title="Cancel generation"
-              >
-                <StopCircleIcon size={20} />
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={
-                  (!inputValue.trim() && attachments.length === 0) ||
-                  disableSendButton
-                }
-                className="px-2 py-2 mt-1 mr-1 hover:bg-(--background-darkest) text-(--sidebar-accent-fg) rounded-lg disabled:opacity-50"
-                title="Send message"
-              >
-                <SendHorizontalIcon size={20} />
-              </button>
-            )}
+            
           </div>
           <div className="pl-2 pr-1 flex items-center justify-between pb-2">
             <div className="flex items-center">
@@ -334,6 +314,30 @@ export function ChatInput({ chatId }: { chatId?: number }) {
                 onFileSelect={handleFileSelect}
                 disabled={isStreaming}
               />
+            </div>
+
+            <div>
+              {isStreaming ? (
+                <button
+                  onClick={handleCancel}
+                  className="px-2 py-2 mt-1 mr-1 hover:bg-(--background-darkest) text-(--sidebar-accent-fg) rounded-lg"
+                  title="Cancel generation"
+                >
+                  <StopCircleIcon size={20} />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={
+                    (!inputValue.trim() && attachments.length === 0) ||
+                    disableSendButton
+                  }
+                  className="px-2 py-2 mt-1 mr-1 hover:bg-(--background-darkest) text-(--sidebar-accent-fg) rounded-lg disabled:opacity-50"
+                  title="Send message"
+                >
+                  <SendHorizontalIcon size={20} />
+                </button>
+              )}
             </div>
 
             {!IS_DISTRIBUTION_BUILD && (
