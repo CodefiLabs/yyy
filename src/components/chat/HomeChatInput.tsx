@@ -88,7 +88,7 @@ export function HomeChatInput({
             />
           </div>
           <div className="px-2 pb-2 flex items-center justify-between">
-            <div class="flex items-center">
+            <div className="flex items-center">
               <ChatInputControls />
               {/* File attachment dropdown */}
               <FileAttachmentDropdown
