@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Code2, FileText } from "lucide-react";
 import { CustomTagState } from "./stateTypes";
+import { isDistributionBuild } from "../../ipc/utils/distribution_utils";
 
 interface DyadCodebaseContextProps {
   children: React.ReactNode;
@@ -15,6 +16,11 @@ interface DyadCodebaseContextProps {
 export const DyadCodebaseContext: React.FC<DyadCodebaseContextProps> = ({
   node,
 }) => {
+  // Hide in distribution mode
+  if (isDistributionBuild()) {
+    return null;
+  }
+
   const state = node?.properties?.state as CustomTagState;
   const inProgress = state === "pending";
   const [isExpanded, setIsExpanded] = useState(inProgress);
