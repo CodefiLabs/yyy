@@ -66,6 +66,7 @@ import { SelectedComponentDisplay } from "./SelectedComponentDisplay";
 import { useCheckProblems } from "@/hooks/useCheckProblems";
 import { LexicalChatInput } from "./LexicalChatInput";
 import { useChatModeToggle } from "@/hooks/useChatModeToggle";
+import { IS_DISTRIBUTION_BUILD } from "@/ipc/utils/distribution_utils";
 
 const showTokenBarAtom = atom(false);
 
@@ -337,25 +338,27 @@ export function ChatInput({ chatId }: { chatId?: number }) {
               />
             </div>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setShowTokenBar(!showTokenBar)}
-                    variant="ghost"
-                    className={`has-[>svg]:px-2 ${
-                      showTokenBar ? "text-purple-500 bg-purple-100" : ""
-                    }`}
-                    size="sm"
-                  >
-                    <ChartColumnIncreasing size={14} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {showTokenBar ? "Hide token usage" : "Show token usage"}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {!IS_DISTRIBUTION_BUILD && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={() => setShowTokenBar(!showTokenBar)}
+                      variant="ghost"
+                      className={`has-[>svg]:px-2 ${
+                        showTokenBar ? "text-purple-500 bg-purple-100" : ""
+                      }`}
+                      size="sm"
+                    >
+                      <ChartColumnIncreasing size={14} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {showTokenBar ? "Hide token usage" : "Show token usage"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
           {/* TokenBar is only displayed when showTokenBar is true */}
           {showTokenBar && <TokenBar chatId={chatId} />}
