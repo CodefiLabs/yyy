@@ -18,6 +18,7 @@ import { useLanguageModelProviders } from "@/hooks/useLanguageModelProviders";
 import { useSettings } from "@/hooks/useSettings";
 import { useUserBudgetInfo } from "@/hooks/useUserBudgetInfo";
 import { PromoMessage } from "./PromoMessage";
+import { isDistributionBuild } from "@/ipc/utils/distribution_utils";
 
 interface MessagesListProps {
   messages: Message[];
@@ -238,6 +239,7 @@ export const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
         {isStreaming &&
           !settings?.enableDyadPro &&
           !userBudget &&
+          !isDistributionBuild() &&
           messages.length > 0 && (
             <PromoMessage
               seed={messages.length * (appId ?? 1) * (selectedChatId ?? 1)}
