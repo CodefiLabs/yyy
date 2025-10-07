@@ -43,7 +43,7 @@ import type { Message } from "@/ipc/ipc_types";
 import { isPreviewOpenAtom } from "@/atoms/viewAtoms";
 import { useRunApp } from "@/hooks/useRunApp";
 import { AutoApproveSwitch } from "../AutoApproveSwitch";
-import { usePostHog } from "posthog-js/react";
+import { captureEvent } from "@/lib/telemetry";
 import { CodeHighlight } from "./CodeHighlight";
 import { TokenBar } from "./TokenBar";
 import {
@@ -71,7 +71,6 @@ import { IS_DISTRIBUTION_BUILD } from "@/ipc/utils/distribution_utils";
 const showTokenBarAtom = atom(false);
 
 export function ChatInput({ chatId }: { chatId?: number }) {
-  const posthog = usePostHog();
   const [inputValue, setInputValue] = useAtom(chatInputValueAtom);
   const { settings } = useSettings();
   const appId = useAtomValue(selectedAppIdAtom);
@@ -156,7 +155,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
       selectedComponent,
     });
     clearAttachments();
-    posthog.capture("chat:submit");
+    captureEvent("chat:submit");
   };
 
   const handleCancel = () => {
@@ -177,7 +176,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
       `Approving proposal for chatId: ${chatId}, messageId: ${messageId}`,
     );
     setIsApproving(true);
-    posthog.capture("chat:approve");
+    captureEvent("chat:approve");
     try {
       const result = await IpcClient.getInstance().approveProposal({
         chatId,
@@ -187,7 +186,6 @@ export function ChatInput({ chatId }: { chatId?: number }) {
         showExtraFilesToast({
           files: result.extraFiles,
           error: result.extraFilesError,
-          posthog,
         });
       }
     } catch (err) {
@@ -214,7 +212,7 @@ export function ChatInput({ chatId }: { chatId?: number }) {
       `Rejecting proposal for chatId: ${chatId}, messageId: ${messageId}`,
     );
     setIsRejecting(true);
-    posthog.capture("chat:reject");
+    captureEvent("chat:reject");
     try {
       await IpcClient.getInstance().rejectProposal({
         chatId,
@@ -487,7 +485,7 @@ function RebuildButton() {
   const onClick = useCallback(async () => {
     if (!selectedAppId) return;
 
-    posthog.capture("action:rebuild");
+    captureEvent("action:rebuild");
     await restartApp({ removeNodeModules: true });
   }, [selectedAppId, posthog, restartApp]);
 
@@ -506,7 +504,7 @@ function RestartButton() {
   const onClick = useCallback(async () => {
     if (!selectedAppId) return;
 
-    posthog.capture("action:restart");
+    captureEvent("action:restart");
     await restartApp();
   }, [selectedAppId, posthog, restartApp]);
 
@@ -525,7 +523,7 @@ function RefreshButton() {
   const posthog = usePostHog();
 
   const onClick = useCallback(() => {
-    posthog.capture("action:refresh");
+    captureEvent("action:refresh");
     refreshAppIframe();
   }, [posthog, refreshAppIframe]);
 

@@ -14,8 +14,14 @@ import {
 import { showError, showMcpConsentToast } from "./lib/toast";
 import { IpcClient } from "./ipc/ipc_client";
 
+// Detect distribution build mode
+const IS_DISTRIBUTION_BUILD = process.env.DYAD_DISTRIBUTION_BUILD === "true";
+
 // @ts-ignore
 console.log("Running in mode:", import.meta.env.MODE);
+if (IS_DISTRIBUTION_BUILD) {
+  console.log("Distribution mode: Telemetry disabled");
+}
 
 interface MyMeta extends Record<string, unknown> {
   showErrorToast: boolean;
@@ -53,7 +59,8 @@ const queryClient = new QueryClient({
   }),
 });
 
-const posthogClient = posthog.init(
+// Only initialize PostHog if NOT in distribution mode
+const posthogClient = !IS_DISTRIBUTION_BUILD ? posthog.init(
   "phc_5Vxx0XT8Ug3eWROhP6mm4D6D2DgIIKT232q4AKxC2ab",
   {
     api_host: "https://us.i.posthog.com",
@@ -69,7 +76,7 @@ const posthogClient = posthog.init(
       }
       const telemetryUserId = getTelemetryUserId();
       if (telemetryUserId) {
-        posthogClient.identify(telemetryUserId);
+        posthogClient?.identify(telemetryUserId);
       }
 
       if (event?.properties["$ip"]) {
@@ -86,10 +93,15 @@ const posthogClient = posthog.init(
     },
     persistence: "localStorage",
   },
-);
+) : null;
 
 function App() {
   useEffect(() => {
+    // Only track navigation if telemetry is enabled (not in distribution mode)
+    if (IS_DISTRIBUTION_BUILD) {
+      return;
+    }
+
     // Subscribe to navigation state changes
     const unsubscribe = router.subscribe("onResolved", (navigation) => {
       // Capture the navigation event in PostHog
@@ -127,12 +139,21 @@ function App() {
   return <RouterProvider router={router} />;
 }
 
-createRoot(document.getElementById("root")!).render(
+// Conditionally wrap with PostHogProvider based on distribution mode
+const AppWithProviders = IS_DISTRIBUTION_BUILD ? (
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <PostHogProvider client={posthogClient}>
+      <App />
+    </QueryClientProvider>
+  </StrictMode>
+) : (
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <PostHogProvider client={posthogClient!}>
         <App />
       </PostHogProvider>
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 );
+
+createRoot(document.getElementById("root")!).render(AppWithProviders);

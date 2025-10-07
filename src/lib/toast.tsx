@@ -1,9 +1,9 @@
 import { toast } from "sonner";
-import { PostHog } from "posthog-js";
 import React from "react";
 import { CustomErrorToast } from "../components/CustomErrorToast";
 import { InputRequestToast } from "../components/InputRequestToast";
 import { McpConsentToast } from "../components/McpConsentToast";
+import { captureEvent } from "@/lib/telemetry";
 
 /**
  * Toast utility functions for consistent notifications across the app
@@ -138,17 +138,15 @@ export function showMcpConsentToast(args: {
 export const showExtraFilesToast = ({
   files,
   error,
-  posthog,
 }: {
   files: string[];
   error?: string;
-  posthog: PostHog;
 }) => {
   if (error) {
     showError(
       `Error committing files ${files.join(", ")} changed outside of Dyad: ${error}`,
     );
-    posthog.capture("extra-files:error", {
+    captureEvent("extra-files:error", {
       files: files,
       error,
     });
@@ -157,7 +155,7 @@ export const showExtraFilesToast = ({
       `Files changed outside of Dyad have automatically been committed:
     \n\n${files.join("\n")}`,
     );
-    posthog.capture("extra-files:warning", {
+    captureEvent("extra-files:warning", {
       files: files,
     });
   }

@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NodeSystemInfo } from "@/ipc/ipc_types";
-import { usePostHog } from "posthog-js/react";
+import { captureEvent } from "@/lib/telemetry";
 import { useLanguageModelProviders } from "@/hooks/useLanguageModelProviders";
 import { useScrollAndNavigateTo } from "@/hooks/useScrollAndNavigateTo";
 // @ts-ignore
@@ -38,7 +38,6 @@ type NodeInstallStep =
   | "finished-checking";
 
 export function SetupBanner() {
-  const posthog = usePostHog();
   const navigate = useNavigate();
   const { isAnyProviderSetup, isLoading: loading } =
     useLanguageModelProviders();
@@ -70,7 +69,7 @@ export function SetupBanner() {
   });
 
   const handleGoogleSetupClick = () => {
-    posthog.capture("setup-flow:ai-provider-setup:google:click");
+    captureEvent("setup-flow:ai-provider-setup:google:click");
     navigate({
       to: providerSettingsRoute.id,
       params: { provider: "google" },
@@ -78,32 +77,32 @@ export function SetupBanner() {
   };
 
   const handleOpenRouterSetupClick = () => {
-    posthog.capture("setup-flow:ai-provider-setup:openrouter:click");
+    captureEvent("setup-flow:ai-provider-setup:openrouter:click");
     navigate({
       to: providerSettingsRoute.id,
       params: { provider: "openrouter" },
     });
   };
   const handleDyadProSetupClick = () => {
-    posthog.capture("setup-flow:ai-provider-setup:dyad:click");
+    captureEvent("setup-flow:ai-provider-setup:dyad:click");
     IpcClient.getInstance().openExternalUrl(
       "https://www.dyad.sh/pro?utm_source=dyad-app&utm_medium=app&utm_campaign=setup-banner",
     );
   };
 
   const handleOtherProvidersClick = () => {
-    posthog.capture("setup-flow:ai-provider-setup:other:click");
+    captureEvent("setup-flow:ai-provider-setup:other:click");
     settingsScrollAndNavigateTo("provider-settings");
   };
 
   const handleNodeInstallClick = useCallback(async () => {
-    posthog.capture("setup-flow:start-node-install-click");
+    captureEvent("setup-flow:start-node-install-click");
     setNodeInstallStep("waiting-for-continue");
     IpcClient.getInstance().openExternalUrl(nodeSystemInfo!.nodeDownloadUrl);
   }, [nodeSystemInfo, setNodeInstallStep]);
 
   const finishNodeInstall = useCallback(async () => {
-    posthog.capture("setup-flow:continue-node-install-click");
+    captureEvent("setup-flow:continue-node-install-click");
     setNodeInstallStep("continue-processing");
     await IpcClient.getInstance().reloadEnvPath();
     await checkNode();
@@ -402,14 +401,13 @@ export const OpenRouterSetupBanner = ({
 }: {
   className?: string;
 }) => {
-  const posthog = usePostHog();
   const navigate = useNavigate();
   return (
     <SetupProviderCard
       className={cn("mt-2", className)}
       variant="openrouter"
       onClick={() => {
-        posthog.capture("setup-flow:ai-provider-setup:openrouter:click");
+        captureEvent("setup-flow:ai-provider-setup:openrouter:click");
         navigate({
           to: providerSettingsRoute.id,
           params: { provider: "openrouter" },
