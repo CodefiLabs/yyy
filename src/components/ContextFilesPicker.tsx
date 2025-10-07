@@ -17,8 +17,14 @@ import {
 import { useSettings } from "@/hooks/useSettings";
 import { useContextPaths } from "@/hooks/useContextPaths";
 import type { ContextPathResult } from "@/lib/schemas";
+import { isDistributionBuild } from "@/ipc/utils/distribution_utils";
 
 export function ContextFilesPicker() {
+  // Hide in distribution mode
+  if (isDistributionBuild()) {
+    return null;
+  }
+
   const { settings } = useSettings();
   const {
     contextPaths,
