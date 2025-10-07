@@ -19,6 +19,7 @@ import { BackupManager } from "./backup_manager";
 import { getDatabasePath, initializeDatabase } from "./db";
 import { UserSettings } from "./lib/schemas";
 import { handleNeonOAuthReturn } from "./neon_admin/neon_return_handler";
+import * as https from "https";
 
 log.errorHandler.startCatching();
 log.eventLogger.startLogging();
@@ -28,6 +29,20 @@ const logger = log.scope("main");
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Configure HTTPS to accept self-signed certificates for .test domains (development only)
+// This is needed for Laravel Valet/Herd local development
+if (process.env.NODE_ENV === 'development' || process.env.DYAD_DISTRIBUTION_BUILD === 'true') {
+  const originalCreateConnection = https.Agent.prototype.createConnection;
+  https.Agent.prototype.createConnection = function(options: any, callback: any) {
+    // Check if this is a .test domain
+    if (options.host && options.host.includes('.test')) {
+      console.log('Disabling TLS verification for .test domain:', options.host);
+      options.rejectUnauthorized = false;
+    }
+    return originalCreateConnection.call(this, options, callback);
+  };
+}
 
 // Register IPC handlers before app is ready
 registerIpcHandlers();
@@ -47,6 +62,18 @@ if (process.defaultApp) {
 } else {
   app.setAsDefaultProtocolClient("dyad");
 }
+
+// Ignore certificate errors for .test domains (development only)
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  // Only bypass for .test domains (Laravel Valet/Herd local development)
+  if (url.includes('.test')) {
+    console.log('Ignoring certificate error for .test domain:', url);
+    event.preventDefault();
+    callback(true); // Trust the certificate
+  } else {
+    callback(false); // Use default behavior for other domains
+  }
+});
 
 export async function onReady() {
   try {
