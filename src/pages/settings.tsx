@@ -140,44 +140,46 @@ export default function SettingsPage() {
           </div>
 
           {/* Experiments Section */}
-          <div
-            id="experiments"
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
-          >
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Experiments
-            </h2>
-            <div className="space-y-4">
-              <div className="space-y-1 mt-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="enable-native-git"
-                    checked={!!settings?.enableNativeGit}
-                    onCheckedChange={(checked) => {
-                      updateSettings({
-                        enableNativeGit: checked,
-                      });
-                    }}
-                  />
-                  <Label htmlFor="enable-native-git">Enable Native Git</Label>
-                </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Native Git offers faster performance but requires{" "}
-                  <a
-                    onClick={() => {
-                      IpcClient.getInstance().openExternalUrl(
-                        "https://git-scm.com/downloads",
-                      );
-                    }}
-                    className="text-blue-600 hover:underline dark:text-blue-400"
-                  >
-                    installing Git
-                  </a>
-                  .
+          {!IS_DISTRIBUTION_BUILD && (
+            <div
+              id="experiments"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
+            >
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Experiments
+              </h2>
+              <div className="space-y-4">
+                <div className="space-y-1 mt-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="enable-native-git"
+                      checked={!!settings?.enableNativeGit}
+                      onCheckedChange={(checked) => {
+                        updateSettings({
+                          enableNativeGit: checked,
+                        });
+                      }}
+                    />
+                    <Label htmlFor="enable-native-git">Enable Native Git</Label>
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    Native Git offers faster performance but requires{" "}
+                    <a
+                      onClick={() => {
+                        IpcClient.getInstance().openExternalUrl(
+                          "https://git-scm.com/downloads",
+                        );
+                      }}
+                      className="text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      installing Git
+                    </a>
+                    .
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Danger Zone */}
           <div

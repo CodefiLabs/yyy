@@ -19,7 +19,7 @@ const SETTINGS_SECTIONS = [
     { id: "integrations", label: "Integrations" },
   ] : []),
   { id: "tools-mcp", label: "Tools (MCP)" },
-  { id: "experiments", label: "Experiments" },
+  ...(!IS_DISTRIBUTION_BUILD ? [{ id: "experiments", label: "Experiments" }] : []),
   { id: "danger-zone", label: "Danger Zone" },
 ];
 

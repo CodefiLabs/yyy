@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   enableProSmartFilesContextMode: true,
   selectedChatMode: "build",
   enableAutoFixProblems: false,
+  enableNativeGit: false,
   enableAutoUpdate: true,
   releaseChannel: "stable",
   selectedTemplateId: DEFAULT_TEMPLATE_ID,
