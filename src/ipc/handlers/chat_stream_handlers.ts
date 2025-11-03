@@ -786,8 +786,20 @@ This conversation includes one or more image attachments. When the user uploads 
               logger.error("Error streaming text:", error);
               let errorMessage = (error as any)?.error?.message;
               const responseBody = error?.error?.responseBody;
+              // Only append responseBody if it contains additional information
+              // not already present in the error message
               if (errorMessage && responseBody) {
-                errorMessage += "\n\nDetails: " + responseBody;
+                try {
+                  const parsedBody = JSON.parse(responseBody);
+                  // Check if the responseBody's error message is different from the main error message
+                  const bodyErrorMessage = parsedBody?.error?.message;
+                  if (bodyErrorMessage && bodyErrorMessage !== errorMessage) {
+                    errorMessage += "\n\nDetails: " + responseBody;
+                  }
+                } catch {
+                  // If parsing fails, just append the raw responseBody
+                  errorMessage += "\n\nDetails: " + responseBody;
+                }
               }
               const message = errorMessage || JSON.stringify(error);
               const requestIdPrefix = isEngineEnabled
